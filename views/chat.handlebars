@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+</head>
+<body>
+    <h1>Chat</h1>
+    <div id="chat-box">
+        {{#each messages}}
+            <p>{{user}}: {{message}}</p>
+        {{/each}}
+    </div>
+    <form id="chat-form">
+        <input type="text" id="user-input" placeholder="Tu correo electrónico">
+        <input type="text" id="message-input" placeholder="Escribe tu mensaje">
+        <button type="submit">Enviar</button>
+    </form>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Mostrar mensajes anteriores
+        socket.on('messages', function(messages) {
+            const chatBox = document.getElementById('chat-box');
+            messages.forEach(function(message) {
+                const p = document.createElement('p');
+                p.textContent = message.user + ': ' + message.message;
+                chatBox.appendChild(p);
+            });
+        });
+
+        // Recibir y mostrar nuevos mensajes
+        socket.on('message', function(message) {
+            const chatBox = document.getElementById('chat-box');
+            const p = document.createElement('p');
+            p.textContent = message.user + ': ' + message.message;
+            chatBox.appendChild(p);
+        });
+
+        // Enviar mensaje
+        document.getElementById('chat-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const user = document.getElementById('user-input').value;
+            const message = document.getElementById('message-input').value;
+            socket.emit('chatMessage', { user, message });
+            document.getElementById('message-input').value = '';
+        });
+    </script>
+</body>
+</html>
